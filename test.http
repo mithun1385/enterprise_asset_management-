@@ -1,0 +1,127 @@
+
+###
+# GET the Assets data 
+
+GET http://localhost:4004/odata/v4/enterprise/Assets
+
+###
+# get employee datails 
+
+GET http://localhost:4004/odata/v4/enterprise/employee 
+###
+#create the data 
+#BOTH ALSO TO BE CREATED 
+###
+#check the maintenance and retired 
+POST http://localhost:4004/odata/v4/enterprise/Assets
+Content-Type: application/json
+
+{
+  "name":"Laptop",
+  "type":"Electronics",
+  "serialNumber": "SN1001",
+  "purchaseDate": "2024-01-10",
+  "value": 75000,
+  "status": "retired",
+  "location": "Chennai"
+}
+###
+POST http://localhost:4004/odata/v4/enterprise/employee
+Content-Type: application/json
+
+{
+  "name": "Mithun",
+  "email": "mithun@example.com"
+}
+
+###
+### 3. Assign Asset (Valid)
+POST http://localhost:4004/odata/v4/enterprise/assignment
+Content-Type: application/json
+
+{
+    "asset":{
+        "ID":"550e8400-e29b-41d4-a716-446655440002"
+    },
+    "employees":{
+        "ID":"550e8400-e29b-41d4-a716-446655440019"
+    },
+    "assignedOn":"2026-06-16"
+}
+
+###
+GET http://localhost:4004/odata/v4/enterprise/assignment
+###
+GET http://localhost:4004/odata/v4/enterprise/maintenance
+
+###
+POST http://localhost:4004/odata/v4/enterprise/maintenance
+Content-Type: application/json
+
+{
+  "asset_ID": "550e8400-e29b-41d4-a716-446655440009",
+  "issue": "damaged some parts",
+  "status": "InProgress",
+  "cost": 1000
+}
+###
+PATCH http://localhost:4004/odata/v4/enterprise/maintenance(437b1b1f-014a-48d2-be2e-b5bc9c8afd99)
+Content-Type: application/json
+
+{
+  "status": "Completed"
+}
+
+### 
+POST  http://localhost:4004/odata/v4/enterprise/AssetRequests
+Content-Type: application/json
+
+{
+  "assetName":"Laptop",
+  "type":"Electronic",
+  "role":"Managed"
+}
+
+###
+#get the aprove or reject or pending 
+GET http://localhost:4004/odata/v4/enterprise/AssetRequests
+
+
+###
+#post the role based for approval 
+POST http://localhost:4004/odata/v4/enterprise/employee
+Content-Type: application/json
+
+{
+  "name":"mithun manager",
+  "email":"mithunraj@gmail.com",
+  "role":"Manager"
+}
+###
+
+
+POST http://localhost:4004/odata/v4/enterprise/AssetRequests
+Content-Type: application/json
+
+{
+  "assetName":"Laptop",
+  "type":"Electronics",
+  "requestedBy":{
+    "ID":"550e8400-e29b-41d4-a716-446655440010"
+  }
+}
+
+###
+PATCH  http://localhost:4004/odata/v4/enterprise/AssetRequests(d818a30c-b271-48f8-b78f-036c2439914c)
+Content-Type: application/json
+
+{
+  "status":"Approved",
+  "approvedBy":{
+    "ID":"5668a7df-6a06-4f1e-9180-2ac1d57cf12b"
+  }
+}
+
+
+
+
