@@ -1,13 +1,9 @@
-
 ###
 # GET the Assets data 
-
 GET http://localhost:4004/odata/v4/enterprise/Assets
-
 ###
 # get employee datails 
-
-GET http://localhost:4004/odata/v4/enterprise/employee 
+GET http://localhost:4004/odata/v4/enterprise/employee
 ###
 #create the data 
 #BOTH ALSO TO BE CREATED 
@@ -22,16 +18,18 @@ Content-Type: application/json
   "serialNumber": "SN1001",
   "purchaseDate": "2024-01-10",
   "value": 75000,
-  "status": "retired",
+  "status": "active",
   "location": "Chennai"
 }
+
 ###
 POST http://localhost:4004/odata/v4/enterprise/employee
 Content-Type: application/json
 
 {
   "name": "Mithun",
-  "email": "mithun@example.com"
+  "email": "mithun@example.com",
+  "role":"employee"
 }
 
 ###
@@ -41,10 +39,10 @@ Content-Type: application/json
 
 {
     "asset":{
-        "ID":"550e8400-e29b-41d4-a716-446655440002"
+        "ID":"550e8400-e29b-41d4-a716-446655440007"
     },
-    "employees":{
-        "ID":"550e8400-e29b-41d4-a716-446655440019"
+    "employee":{
+        "ID":"550e8400-e29b-41d4-a716-446655440012"
     },
     "assignedOn":"2026-06-16"
 }
@@ -65,7 +63,7 @@ Content-Type: application/json
   "cost": 1000
 }
 ###
-PATCH http://localhost:4004/odata/v4/enterprise/maintenance(437b1b1f-014a-48d2-be2e-b5bc9c8afd99)
+PATCH http://localhost:4004/odata/v4/enterprise/maintenance(600b2375-a412-481b-8dc8-b51210ba97ae)
 Content-Type: application/json
 
 {
@@ -73,19 +71,23 @@ Content-Type: application/json
 }
 
 ### 
+# this should be the request for the product and then approve by the manager 
 POST  http://localhost:4004/odata/v4/enterprise/AssetRequests
 Content-Type: application/json
 
 {
-  "assetName":"Laptop",
+  "assetName":"switch",
   "type":"Electronic",
-  "role":"Managed"
+  "requestedBy":{
+
+"ID": "550e8400-e29b-41d4-a716-446655440016"
+  },
+  "status":"pending"
 }
 
 ###
 #get the aprove or reject or pending 
 GET http://localhost:4004/odata/v4/enterprise/AssetRequests
-
 
 ###
 #post the role based for approval 
@@ -101,27 +103,30 @@ Content-Type: application/json
 
 
 POST http://localhost:4004/odata/v4/enterprise/AssetRequests
-Content-Type: application/json
+Content-Type: application/json  
 
 {
-  "assetName":"Laptop",
+  "assetName":"printer",
   "type":"Electronics",
   "requestedBy":{
-    "ID":"550e8400-e29b-41d4-a716-446655440010"
+    "ID":"550e8400-e29b-41d4-a716-446655440012"
   }
 }
 
 ###
-PATCH  http://localhost:4004/odata/v4/enterprise/AssetRequests(d818a30c-b271-48f8-b78f-036c2439914c)
+## this api is used to approve the requested order 
+PATCH http://localhost:4004/odata/v4/enterprise/AssetRequests(4046a843-8c36-48af-98f0-7a03ce63e03a)
 Content-Type: application/json
 
 {
-  "status":"Approved",
-  "approvedBy":{
-    "ID":"5668a7df-6a06-4f1e-9180-2ac1d57cf12b"
-  }
+  "status": "Approved",
+  "approvedBy_ID": "c3bf4239-e948-4ac7-b737-db83d8e90603"
 }
 
+###
 
+### Check updated data
+GET http://localhost:4004/odata/v4/enterprise/AssetRequests(ID=66f5345e-3a24-4f64-8d5e-f94d8807b492,IsActiveEntity=true)
 
-
+### 
+GET http://localhost:4004/odata/v4/enterprise/AssetRequests

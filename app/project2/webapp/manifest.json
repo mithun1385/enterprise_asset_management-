@@ -1,7 +1,7 @@
 {
   "_version": "1.83.0",
   "sap.app": {
-    "id": "project1",
+    "id": "project2",
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
@@ -13,7 +13,7 @@
     "sourceTemplate": {
       "id": "@sap/generator-fiori:lrop",
       "version": "1.22.0",
-      "toolsId": "eddf64bc-d78b-4826-8a80-3ebb59503cfb"
+      "toolsId": "86caa424-82ab-4f8a-a3fc-5204103ef6fc"
     },
     "dataSources": {
       "mainService": {
@@ -60,7 +60,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "project1.i18n.i18n"
+          "bundleName": "project2.i18n.i18n"
         }
       },
       "": {
@@ -85,28 +85,28 @@
       "routes": [
         {
           "pattern": ":?query:",
-          "name": "AssetRequestsList",
-          "target": "AssetRequestsList"
+          "name": "maintenanceList",
+          "target": "maintenanceList"
         },
         {
-          "pattern": "AssetRequests({key}):?query:",
-          "name": "AssetRequestsObjectPage",
-          "target": "AssetRequestsObjectPage"
+          "pattern": "maintenance({key}):?query:",
+          "name": "maintenanceObjectPage",
+          "target": "maintenanceObjectPage"
         }
       ],
       "targets": {
-        "AssetRequestsList": {
+        "maintenanceList": {
           "type": "Component",
-          "id": "AssetRequestsList",
+          "id": "maintenanceList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "contextPath": "/AssetRequests",
+              "contextPath": "/maintenance",
               "variantManagement": "Page",
               "navigation": {
-                "AssetRequests": {
+                "maintenance": {
                   "detail": {
-                    "route": "AssetRequestsObjectPage"
+                    "route": "maintenanceObjectPage"
                   }
                 }
               },
@@ -120,15 +120,14 @@
             }
           }
         },
-        "AssetRequestsObjectPage": {
+        "maintenanceObjectPage": {
           "type": "Component",
-          "id": "AssetRequestsObjectPage",
+          "id": "maintenanceObjectPage",
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/AssetRequests",
-              "sectionLayout": "Tabs"
+              "contextPath": "/maintenance"
             }
           }
         }

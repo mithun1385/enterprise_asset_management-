@@ -2,7 +2,8 @@
   "name": "EAM",
   "version": "1.0.0",
   "dependencies": {
-    "@sap/cds": "^9"
+    "@sap/cds": "^9",
+    "sqlite3": "^6.0.1"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2",
@@ -10,7 +11,10 @@
   },
   "scripts": {
     "start": "cds-serve",
-    "watch-project1": "cds watch --open project1/index.html?sap-ui-xx-viewCache=false --livereload false"
+    "watch-project1": "cds watch --open project1/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-assetrequest": "cds watch --open assetrequest/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-project2": "cds watch --open project2/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-project3": "cds watch --open project3/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "cds": {
     "requires": {
@@ -27,6 +31,14 @@
     "app/*"
   ],
   "sapux": [
-    "app/project1"
+    "app/project1",
+    "app/project1",
+    "app/project1",
+    "app/project1",
+    "app/assetrequest",
+    "app/project1",
+    "app/project1",
+    "app/project2",
+    "app/project3"
   ]
 }

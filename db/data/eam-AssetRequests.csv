@@ -1,1 +1,11 @@
-ID,assetName,type,requestedBy,status
+assetName,type,status
+Laptop,Electronics,pending
+Printer,Electronics,pending
+Server,IT,pending
+Router,Networking,pending
+Desktop,Electronics,pending
+Switch,Networking,pending 
+Tablet,Electronics,pending
+Firewall,Security,pending
+Scanner,Electronics,pending
+UPS,Power,pending

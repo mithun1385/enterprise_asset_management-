@@ -1,7 +1,7 @@
 {
   "_version": "1.83.0",
   "sap.app": {
-    "id": "project1",
+    "id": "project3",
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
@@ -13,7 +13,7 @@
     "sourceTemplate": {
       "id": "@sap/generator-fiori:lrop",
       "version": "1.22.0",
-      "toolsId": "eddf64bc-d78b-4826-8a80-3ebb59503cfb"
+      "toolsId": "f9fff607-c4c3-4242-90fa-e80f643c8a28"
     },
     "dataSources": {
       "mainService": {
@@ -45,11 +45,12 @@
   "sap.ui5": {
     "flexEnabled": true,
     "dependencies": {
-      "minUI5Version": "1.147.0",
+      "minUI5Version": "1.147.1",
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
-        "sap.fe.templates": {}
+        "sap.fe.templates": {},
+        "sap.f": {}
       }
     },
     "contentDensities": {
@@ -60,7 +61,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "project1.i18n.i18n"
+          "bundleName": "project3.i18n.i18n"
         }
       },
       "": {
@@ -81,32 +82,43 @@
       "css": []
     },
     "routing": {
-      "config": {},
+      "config": {
+        "flexibleColumnLayout": {
+          "defaultTwoColumnLayoutType": "TwoColumnsMidExpanded",
+          "defaultThreeColumnLayoutType": "ThreeColumnsEndExpanded"
+        },
+        "routerClass": "sap.f.routing.Router"
+      },
       "routes": [
         {
           "pattern": ":?query:",
-          "name": "AssetRequestsList",
-          "target": "AssetRequestsList"
+          "name": "assignmentList",
+          "target": [
+            "assignmentList"
+          ]
         },
         {
-          "pattern": "AssetRequests({key}):?query:",
-          "name": "AssetRequestsObjectPage",
-          "target": "AssetRequestsObjectPage"
+          "pattern": "assignment({key}):?query:",
+          "name": "assignmentObjectPage",
+          "target": [
+            "assignmentList",
+            "assignmentObjectPage"
+          ]
         }
       ],
       "targets": {
-        "AssetRequestsList": {
+        "assignmentList": {
           "type": "Component",
-          "id": "AssetRequestsList",
+          "id": "assignmentList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "contextPath": "/AssetRequests",
+              "contextPath": "/assignment",
               "variantManagement": "Page",
               "navigation": {
-                "AssetRequests": {
+                "assignment": {
                   "detail": {
-                    "route": "AssetRequestsObjectPage"
+                    "route": "assignmentObjectPage"
                   }
                 }
               },
@@ -118,21 +130,30 @@
                 }
               }
             }
-          }
+          },
+          "controlAggregation": "beginColumnPages",
+          "contextPattern": ""
         },
-        "AssetRequestsObjectPage": {
+        "assignmentObjectPage": {
           "type": "Component",
-          "id": "AssetRequestsObjectPage",
+          "id": "assignmentObjectPage",
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/AssetRequests",
-              "sectionLayout": "Tabs"
+              "contextPath": "/assignment"
             }
-          }
+          },
+          "controlAggregation": "midColumnPages",
+          "contextPattern": "/assignment({key})"
         }
       }
+    },
+    "rootView": {
+      "viewName": "sap.fe.templates.RootContainer.view.Fcl",
+      "type": "XML",
+      "async": true,
+      "id": "appRootView"
     }
   },
   "sap.fiori": {
