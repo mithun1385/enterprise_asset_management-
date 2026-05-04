@@ -1,170 +1,162 @@
 const cds = require('@sap/cds');
-const { message } = require('@sap/cds/lib/log/cds-error');
-const { SELECT, UPDATE, INSERT } = require('@sap/cds/lib/ql/cds-ql');
-
 module.exports = class enterpriseService extends cds.ApplicationService {
-
     init() {
-        const { Assets, employee, assignment, maintenance, AssetRequests } = this.entities;
+        const { Assets, assignment, maintenance, employee } = this.entities;
 
+        // ── BEFORE CREATE/UPDATE assignment ────────────────────────────────
         this.before(['CREATE', 'UPDATE'], assignment, async (req) => {
-            const { asset_ID } = req.data;
-            console.log(asset_ID, "thils asset_ID");
+            const { asset_ID, employee_ID } = req.data;
 
-            // check the stock available or not 
+            if (!req.data.status_code) {
+                req.data.status_code = '0';
+            }
+
+            if (!asset_ID)
+                return req.error(400, 'Asset is required. Please select an asset.');
+
             const asset = await SELECT.one.from(Assets).where({ ID: asset_ID });
-            console.log(asset, "this is asset");
+            if (!asset)
+                return req.error(400, 'Asset not found');
+            if (asset.status !== 'Active')
+                return req.error(400, `Asset is not available (status: ${asset.status})`);
 
-            if (!asset) {
-                req.error(400, "Asset not found")
+            const existing = await SELECT.one.from(assignment).where({ asset_ID });
+            if (existing && existing.ID !== req.data.ID)
+                return req.error(400, 'Asset is already assigned to another employee');
+
+            req.data.assetName = asset.name;
+            req.data.assetType = asset.type;
+
+            if (employee_ID) {
+                const emp = await SELECT.one.from(employee).where({ ID: employee_ID });
+                if (!emp || emp.role !== 'Employee')
+                    return req.error(400, 'Only employees (not managers) can be assigned an asset');
+                req.data.employeeName = emp.name;
             }
-            // this will active  status  
-            if (asset.status !== 'Active') {
-                req.error(400, 'Asset is not available ');
-            }
-
-            // check wheather the asset is already assigned to other employee check with this code 
-            const existing = await SELECT.one.from(assignment)
-                .where({ asset_ID: asset_ID });
-            console.log(existing, "this is exiting");
-
-            if (existing) {
-                req.error(400, 'Asset is already assigned to another employee');
-            }
-
-            const { employee_ID } = req.data
-            console.log(employee_ID);
-
-            if (!employee_ID) {
-                req.error(400, 'employee ID is required')
-            }
-            const employeeAssign = await SELECT.one.from(employee).where({ ID: employee_ID })
-
-            if (!employeeAssign || employeeAssign.role !== "Employee") {
-                req.error(400, 'only Employee is only will assign the asset')
-            }
-        })
-        this.after('CREATE', maintenance, async (data) => {
-            await UPDATE(Assets)
-                .set({ status: 'Maintenance' })
-                .where({ ID: data.asset_ID });
         });
+
+        // ── AFTER CREATE assignment → mark asset as Assigned ───────────────
+        this.after('CREATE', assignment, async (data) => {
+            if (data.asset_ID) {
+                await UPDATE(Assets)
+                    .set({ status: 'Assigned' })
+                    .where({ ID: data.asset_ID });
+            }
+        });
+
+        // ── AFTER CREATE maintenance → mark asset as UnderMaintenance ──────
+        this.after('CREATE', maintenance, async (data) => {
+            if (data.asset_ID) {
+                await UPDATE(Assets)
+                    .set({ status: 'UnderMaintenance' })
+                    .where({ ID: data.asset_ID });
+            }
+        });
+
+        // ── BEFORE UPDATE maintenance → react to status changes ────────────
         this.before('UPDATE', maintenance, async (req) => {
-            console.log("Incoming data:", req.data);
+            const { status_code } = req.data;
+            if (!status_code) return;
 
-            const { status } = req.data
-
-            if (!status) return;
-
-            console.log("status", status);
-            const record = await SELECT.one.from(maintenance)
-                .where({ ID: req.data.ID });
-
-            console.log(record);
+            const record = await SELECT.one.from(maintenance).where({ ID: req.data.ID });
             if (!record) return;
 
-            const assetID = record.asset_ID
-
-            if (status === 'Completed') {
+            if (status_code === 'Completed') {
                 await UPDATE(Assets)
                     .set({ status: 'Active' })
-                    .where({ ID: assetID });
+                    .where({ ID: record.asset_ID });
             }
-
-            if (status === 'Failed') {
+            if (status_code === 'Rejected') {
                 await UPDATE(Assets)
                     .set({ status: 'Retired' })
-                    .where({ ID: assetID });
+                    .where({ ID: record.asset_ID });
             }
-        })
-        this.before('CREATE', Assets, async (req) => {
-
-            const { status } = req.data;
-
-            if (status === 'maintenance') {
-                req.error(400, "asset under maintenance")
-            }
-            if (status === 'retired') {
-                req.error(400, "asset is retired")
-            }
-        })
-        this.before('CREATE', Assets, (req) => {
-            if (!req.data.status) {
-                req.data.status = 'Active'
-            }
-        })
-        this.on('approved', AssetRequests, async (req) => {
-
-            const approvedBy_ID = "550e8400-e29b-41d4-a716-446655440013";
-            const { ID } = req.params[0];
-
-            // 1. Validate approver
-            if (!approvedBy_ID) {
-                return req.error(400, 'Approver ID is required');
-            }
-
-            const approver = await SELECT.one.from(employee)
-                .where({ ID: approvedBy_ID });
-
-            if (!approver || approver.role !== 'Manager') {
-                return req.error(400, 'Only Manager can approve this request');
-            }
-
-            // 2. Update
-            await UPDATE(AssetRequests)
-                .set({
-                    status: 'Approved',
-                    approvedBy_ID: approvedBy_ID
-                })
-                .where({ ID });
-
-            // 3. JOIN (association expand)
-            const result = await SELECT.one
-                .from(AssetRequests)
-                .where({ ID });
-
-            // 4. Return joined data
-       req.info("Approved successfully") 
-        })
-        this.on('requested', AssetRequests, async (req) => {
-
-            const { ID } = req.params[0];
-            const userId = req.user.id;
-
-            const request = await SELECT.one
-                .from(AssetRequests)
-                .where({ ID });
-
-            if (!request) {
-                return req.error(404, 'Request not found');
-            }
-
-            await UPDATE(AssetRequests)
-                .set({
-                    status: 'pending',
-                    requestedBy_ID: userId
-                })
-                .where({ ID });
-            const updated = await SELECT.one
-                .from(AssetRequests)
-                .where({ ID });
-                 req.info("Requested successfully")
-
-            return updated;
-           
         });
 
-        this.on('createreq', 'AssetRequests.drafts', async (req) => {
+        // ── helper: get ID and correct table based on draft status ──────────
+        const getRecordAndTable = async (req, entity) => {
+            const ID = req.params[req.params.length - 1]?.ID;
+            if (!ID) return {};
 
-            const { assetName, type, status } = req.data;
+            // ✅ Check IsActiveEntity from query params to know draft vs active
+            const isActive = req.query?.SELECT?.where?.find?.(
+                w => w?.ref?.[0] === 'IsActiveEntity'
+            )?.val !== false;
 
-            await INSERT.into(AssetRequests).entries({
-                ID: cds.utils.uuid(),
-                assetName,
-                type,
-                status
-            })
-        })
-        super.init()
+            // Try active table first, then draft table
+            let record = await SELECT.one.from(entity).where({ ID });
+            let table = entity;
+
+            if (!record) {
+                // ✅ fallback to draft table (composition child draft)
+                record = await SELECT.one.from(entity.drafts).where({ ID });
+                table = entity.drafts;
+            }
+
+            return { ID, record, table };
+        };
+
+        // ── ACTION: acceptMaintenance ───────────────────────────────────────
+        this.on('acceptMaintenance', async (req) => {
+            const { ID, record, table } = await getRecordAndTable(req, maintenance);
+            if (!ID) return req.error(400, 'Missing ID');
+            if (!record) return req.error(404, 'Maintenance record not found');
+
+            if (record.status_code === 'Completed')
+                return req.error(400, 'Already completed');
+
+            await UPDATE(table).set({ status_code: 'Completed' }).where({ ID });
+
+            // ✅ Only update asset status if record has asset_ID
+            if (record.asset_ID) {
+                await UPDATE(Assets).set({ status: 'Active' }).where({ ID: record.asset_ID });
+            }
+            req.info('Maintenance accepted — asset marked Active');
+            return SELECT.one.from(table).where({ ID });
+        });
+        // ── ACTION: rejectMaintenance ───────────────────────────────────────
+        this.on('rejectMaintenance', async (req) => {
+            const { ID, record, table } = await getRecordAndTable(req, maintenance);
+            if (!ID) return req.error(400, 'Missing ID');
+            if (!record) return req.error(404, 'Maintenance record not found');
+
+            if (record.status_code === 'Rejected')
+                return req.error(400, 'Already rejected');
+
+            await UPDATE(table).set({ status_code: 'Rejected' }).where({ ID });
+
+            if (record.asset_ID) {
+                await UPDATE(Assets).set({ status: 'Retired' }).where({ ID: record.asset_ID });
+            }
+
+            req.info('Maintenance rejected — asset marked Retired');
+            return SELECT.one.from(table).where({ ID });
+        });
+
+        // ── ACTION: openMaintenance ─────────────────────────────────────────
+        this.on('openMaintenance', async (req) => {
+            const { ID, record, table } = await getRecordAndTable(req, maintenance);
+            if (!ID) return req.error(400, 'Missing ID');
+            if (!record) return req.error(404, 'Maintenance record not found');
+
+            await UPDATE(table).set({ status_code: 'Open' }).where({ ID });
+
+            req.info('Maintenance re-opened');
+            return SELECT.one.from(table).where({ ID });
+        });
+
+        // ── ACTION: closeAssignment ─────────────────────────────────────────
+        this.on('closeAssignment', assignment, async (req) => {
+            const { ID } = req.params[0];
+            const rec = await SELECT.one.from(assignment).where({ ID });
+            if (!rec) return req.error(404, 'Assignment not found');
+
+            await UPDATE(Assets).set({ status: 'Active' }).where({ ID: rec.asset_ID });
+
+            req.info('Assignment closed — asset returned to Active');
+            return SELECT.one.from(assignment).where({ ID });
+        });
+
+        return super.init();
     }
-}
+};

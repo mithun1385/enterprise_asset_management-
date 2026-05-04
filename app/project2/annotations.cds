@@ -1,186 +1,342 @@
 using enterpriseService as service from '../../srv/cat-service';
 
-annotate service.maintenance with @(
-    UI.FieldGroup #GeneratedGroup           : {
-        $Type: 'UI.FieldGroupType',
-        Data : [
-            {
-                $Type: 'UI.DataField',
-                Label: 'issue',
-                Value: issue,
-            },
-            {
-                $Type: 'UI.DataField',
-                Label: 'cost',
-                Value: cost,
-            },
-            {
-                $Type : 'UI.DataField',
-                Value : status_code,
-                Label : 'status_code',
-            },
-        ],
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ASSIGNMENT ANNOTATIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+annotate service.assignment with @(
+
+    UI.HeaderInfo: {
+        TypeName       : 'Asset Assignment',
+        TypeNamePlural : 'Asset Assignments',
+        Title          : {
+            $Type: 'UI.DataField',
+            Value: assetName
+        },
+        Description    : {
+            $Type: 'UI.DataField',
+            Value: employeeName
+        }
     },
-    UI.Facets                               : [
+
+    UI.SelectionFields: [
+        assetName,
+        employeeName,
+        assetStatus,
+        assignedOn
+    ],
+
+    UI.LineItem: [
+        { $Type: 'UI.DataField', Label: 'Asset',        Value: assetName     },
+        { $Type: 'UI.DataField', Label: 'Asset Type',   Value: assetType     },
+        { $Type: 'UI.DataField', Label: 'Location',     Value: assetLocation },
+        { $Type: 'UI.DataField', Label: 'Assigned To',  Value: employeeName  },
+        { $Type: 'UI.DataField', Label: 'Role',         Value: employeeRole  },
+        { $Type: 'UI.DataField', Label: 'Assigned On',  Value: assignedOn    },
+        { $Type: 'UI.DataField', Label: 'Asset Status', Value: assetStatus   },
+        {
+            $Type  : 'UI.DataFieldForAction',
+            Label  : 'Close Assignment',
+            Action : 'enterpriseService.closeAssignment',
+            Inline : false
+        }
+    ],
+
+    UI.HeaderFacets: [
         {
             $Type : 'UI.ReferenceFacet',
-            ID    : 'GeneratedFacet1',
-            Label : 'General Information',
-            Target: '@UI.FieldGroup#GeneratedGroup',
-        },
+            Label : 'Assignment Details',
+            Target: '@UI.FieldGroup#AssignmentHeader'
+        }
     ],
-    UI.LineItem                             : [
-        {
-            $Type: 'UI.DataField',
-            Label: 'issue',
-            Value: issue,
-        },
-        {
-            $Type: 'UI.DataField',
-            Label: 'status',
-            Value: status_code,
-        },
-        {
-            $Type: 'UI.DataField',
-            Label: 'cost',
-            Value: cost,
-        },
-    ],
-    UI.FieldGroup #assignmentAssettoemployee: {
+
+    UI.FieldGroup #AssignmentHeader: {
         $Type: 'UI.FieldGroupType',
         Data : [
-            
-        ],
+            { $Type: 'UI.DataField', Label: 'Asset',        Value: assetName     },
+            { $Type: 'UI.DataField', Label: 'Asset Type',   Value: assetType     },
+            { $Type: 'UI.DataField', Label: 'Location',     Value: assetLocation },
+            { $Type: 'UI.DataField', Label: 'Assigned To',  Value: employeeName  },
+            { $Type: 'UI.DataField', Label: 'Email',        Value: employeeEmail },
+            { $Type: 'UI.DataField', Label: 'Assigned On',  Value: assignedOn    },
+            { $Type: 'UI.DataField', Label: 'Asset Status', Value: assetStatus   },
+            { $Type: 'UI.DataField', Label: 'Notes',        Value: notes         }
+        ]
     },
-    UI.SelectionFields : [
-        asset.ID,
+
+    UI.Facets: [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID    : 'AssignmentInfoSection',
+            Label : 'Assignment Info',
+            Target: '@UI.FieldGroup#AssignmentInfo'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID    : 'MaintenanceSection',
+            Label : 'Maintenance Issues',
+            Target: 'maintenances/@UI.LineItem'
+        }
     ],
+
+    UI.FieldGroup #AssignmentInfo: {
+        $Type: 'UI.FieldGroupType',
+        Data : [
+            { $Type: 'UI.DataField', Label: 'Asset',        Value: assetName     },
+            { $Type: 'UI.DataField', Label: 'Asset Type',   Value: assetType     },
+            { $Type: 'UI.DataField', Label: 'Assigned To',  Value: employeeName  },
+            { $Type: 'UI.DataField', Label: 'Assigned On',  Value: assignedOn    },
+            { $Type: 'UI.DataField', Label: 'Notes',        Value: notes         },
+            { $Type: 'UI.DataField', Label: 'Location',     Value: assetLocation }
+        ]
+    }
 );
 
-annotate service.maintenance with {
-    asset @Common.ValueList: {
-        $Type         : 'Common.ValueListType',
-        CollectionPath: 'Assets',
-        Parameters    : [
-            {
-                $Type            : 'Common.ValueListParameterInOut',
-                LocalDataProperty: asset_ID,
-                ValueListProperty: 'ID',
-            },
-            {
-                $Type            : 'Common.ValueListParameterDisplayOnly',
-                ValueListProperty: 'name',
-            },
-            {
-                $Type            : 'Common.ValueListParameterDisplayOnly',
-                ValueListProperty: 'type',
-            },
-            {
-                $Type            : 'Common.ValueListParameterDisplayOnly',
-                ValueListProperty: 'serialNumber',
-            },
-            {
-                $Type            : 'Common.ValueListParameterDisplayOnly',
-                ValueListProperty: 'purchaseDate',
-            },
-        ],
-    }
-};
-
-annotate service.maintenance with {
-    status @(
-        Common.ValueList               : {
-            $Type         : 'Common.ValueListType',
-            CollectionPath: 'statusVH',
-            Parameters    : [{
-                $Type            : 'Common.ValueListParameterInOut',
-                LocalDataProperty: status_code,
-                ValueListProperty: 'code',
-            }, ],
-            Label         : 'statusVH',
-        },
-        Common.ValueListWithFixedValues: true,
-        Common.Text : status.code,
-    )
-};annotate enterpriseService.assignment with {
+// ── Field labels and value helps for assignment ────────────────────────────
+annotate service.assignment with {
+    assetName     @Common.Label: 'Asset';
+    employeeName  @Common.Label: 'Assigned To';
+    assetType     @Common.Label: 'Asset Type';
+    assetLocation @Common.Label: 'Location';
+    assignedOn    @Common.Label: 'Assigned On';
+    assetStatus   @Common.Label: 'Asset Status';
 
     asset @(
-        Common.ValueList: {
-            $Type: 'Common.ValueListType',
+        Common.Label          : 'Asset',
+        Common.Text           : assetName,
+        Common.TextArrangement: #TextOnly,
+        Common.ValueList      : {
+            $Type         : 'Common.ValueListType',
             CollectionPath: 'Assets',
-            Parameters: [
+            Parameters    : [
                 {
-                    $Type: 'Common.ValueListParameterInOut',
-                    LocalDataProperty: asset_ID,
-                    ValueListProperty: 'ID'
+                    $Type             : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : asset_ID,
+                    ValueListProperty : 'ID'
                 },
                 {
-                    $Type: 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty: 'name'
+                    $Type             : 'Common.ValueListParameterOut',
+                    LocalDataProperty : assetName,
+                    ValueListProperty : 'name'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterOut',
+                    LocalDataProperty : assetType,
+                    ValueListProperty : 'type'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'location'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'status'
                 }
             ]
         },
-        Common.Text: asset.name   // 🔥 IMPORTANT
+        Common.ValueListWithFixedValues: false
     );
 
     employee @(
-        Common.ValueList: {
-            $Type: 'Common.ValueListType',
+        Common.Label          : 'Employee',
+        Common.Text           : employeeName,
+        Common.TextArrangement: #TextOnly,
+        Common.ValueList      : {
+            $Type         : 'Common.ValueListType',
             CollectionPath: 'employee',
-            Parameters: [
+            Parameters    : [
                 {
-                    $Type: 'Common.ValueListParameterInOut',
-                    LocalDataProperty: employee_ID,
-                    ValueListProperty: 'ID'
+                    $Type             : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : employee_ID,
+                    ValueListProperty : 'ID'
                 },
                 {
-                    $Type: 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty: 'name'
+                    $Type             : 'Common.ValueListParameterOut',
+                    LocalDataProperty : employeeName,
+                    ValueListProperty : 'name'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'role'
                 }
             ]
         },
-        Common.Text: employee.name   // 🔥 IMPORTANT
+        Common.ValueListWithFixedValues: false
+    );
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  MAINTENANCE ANNOTATIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+annotate service.maintenance with @(
+
+    UI.CreateHidden: false,
+
+    UI.HeaderInfo: {
+        TypeName       : 'Maintenance Issue',
+        TypeNamePlural : 'Maintenance Issues',
+        Title          : { $Type: 'UI.DataField', Value: issue     },
+        Description    : { $Type: 'UI.DataField', Value: assetName }
+    },
+
+    UI.LineItem: [
+        { $Type: 'UI.DataField', Label: 'Issue',       Value: issue          },
+        // ── Status with criticality color — uses status_code (works in draft too) ──
+        {
+            $Type                    : 'UI.DataField',
+            Label                    : 'Status',
+            Value                    : status_code,
+            Criticality              : criticality,
+            CriticalityRepresentation: #WithIcon
+        },
+ 
+        { $Type: 'UI.DataField', Label: 'Repair Cost', Value: cost           },
+        { $Type: 'UI.DataField', Label: 'Technician',  Value: technicianName },
+        { $Type: 'UI.DataField', Label: 'Resolved On', Value: resolvedOn     },
+        {
+            $Type  : 'UI.DataFieldForAction',
+            Label  : 'Accept',
+            Action : 'enterpriseService.acceptMaintenance',
+            Inline : false,
+            ![@UI.Importance]: #High
+        },
+        {
+            $Type  : 'UI.DataFieldForAction',
+            Label  : 'Reject',
+            Action : 'enterpriseService.rejectMaintenance',
+            Inline : false,
+            ![@UI.Importance]: #High
+        },
+        {
+            $Type  : 'UI.DataFieldForAction',
+            Label  : 'Re-Open',
+            Action : 'enterpriseService.openMaintenance',
+            Inline : false
+        }
+    ],
+
+    UI.Facets: [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID    : 'MaintenanceDetails',
+            Label : 'Maintenance Details',
+            Target: '@UI.FieldGroup#MaintenanceDetails'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID    : 'AssetDetails',
+            Label : 'Asset Details',
+            Target: '@UI.FieldGroup#AssetDetails'
+        }
+    ],
+
+    UI.FieldGroup #MaintenanceDetails: {
+        $Type: 'UI.FieldGroupType',
+        Data : [
+            { $Type: 'UI.DataField', Label: 'Issue',       Value: issue          },
+            // ── Status with criticality color in detail page ───────────────
+            {
+                $Type                    : 'UI.DataFieldWithCriticality',
+                Label                    : 'Status',
+                Value                    : status_code,
+                Criticality              : criticality,
+                CriticalityRepresentation: #WithIcon
+            },
+            { $Type: 'UI.DataField', Label: 'Repair Cost', Value: cost           },
+            { $Type: 'UI.DataField', Label: 'Technician',  Value: technicianName },
+            { $Type: 'UI.DataField', Label: 'Resolved On', Value: resolvedOn     },
+            { $Type: 'UI.DataField', Label: 'Notes',       Value: notes          },
+            { $Type: 'UI.DataField', Label: 'Location',    Value: location       }
+        ]
+    },
+
+    UI.FieldGroup #AssetDetails: {
+        $Type: 'UI.FieldGroupType',
+        Data : [
+            { $Type: 'UI.DataField', Label: 'Asset Name', Value: assetName     },
+            { $Type: 'UI.DataField', Label: 'Technician', Value: technicianName }
+        ]
+    }
+);
+
+annotate service.maintenance with {
+    issue          @Common.Label: 'Issue Description';
+    cost           @Common.Label: 'Repair Cost';
+    assetName      @Common.Label: 'Asset';
+    technicianName @Common.Label: 'Technician';
+
+    // ✅ shows description text ("Open") instead of raw code ("O")
+    // ✅ works in both draft and active mode
+    status_code @(
+        Common.Label                   : 'Status',
+        Common.Text                    : statusDescription,
+        Common.TextArrangement         : #TextOnly,
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'statusVH',
+            Label         : 'Status',
+            Parameters    : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : status_code,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'description'
+                }
+            ]
+        },
+        Common.ValueListWithFixedValues: true
     );
 
-};
-annotate service.Assets with {
-    status @(
-        Common.ValueList : {
-            $Type : 'Common.ValueListType',
-            CollectionPath : 'maintenance',
-            Parameters : [
+    // ✅ hidden from UI — only drives the criticality color rendering
+    criticality @UI.Hidden: true;
+
+    asset @(
+        Common.Label          : 'Asset',
+        Common.Text           : assetName,
+        Common.TextArrangement: #TextOnly,
+        Common.ValueList      : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'Assets',
+            Parameters    : [
                 {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : status,
-                    ValueListProperty : 'status_code',
+                    $Type             : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : asset_ID,
+                    ValueListProperty : 'ID'
                 },
-            ],
-        },
-        Common.ValueListWithFixedValues : true,
-)};
-
-annotate service.statusVH with {
-    code @(
-        Common.ValueList : {
-            $Type : 'Common.ValueListType',
-            CollectionPath : 'statusVH',
-            Parameters : [
                 {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : code,
-                    ValueListProperty : 'code',
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
                 },
-            ],
-            Label : 'status',
-        },
-        Common.ValueListWithFixedValues : true,
-)};
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'type'
+                }
+            ]
+        }
+    );
 
-annotate service.Assets with {
-    name @Common.Label : 'asset/name'
+    employee @(
+        Common.Label          : 'Technician',
+        Common.Text           : technicianName,
+        Common.TextArrangement: #TextOnly,
+        Common.ValueList      : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'employee',
+            Parameters    : [
+                {
+                    $Type             : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : employee_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type             : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        }
+    );
 };
-
-annotate service.Assets with {
-    ID @Common.Label : 'asset/ID'
-};
-

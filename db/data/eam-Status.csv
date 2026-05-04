@@ -1,6 +1,5 @@
-code;description
-Open;Open issue
-InProgress;Work in progress
-Rejected;this should be retired
-Completed;Issue resolved
-
+code,description,criticality
+O,Open,2
+I,InProgress,5
+C,Completed,3
+R,Rejected,1

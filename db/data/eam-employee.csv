@@ -1,11 +1,4 @@
 ID,name,email,role
-550e8400-e29b-41d4-a716-446655440010,Ravi Kumar,ravi.kumar@example.com,Employee
-550e8400-e29b-41d4-a716-446655440011,Priya Sharma,priya.sharma@example.com,Manager
-550e8400-e29b-41d4-a716-446655440012,Arjun Reddy,arjun.reddy@example.com,Employee
-550e8400-e29b-41d4-a716-446655440013,Neha Gupta,neha.gupta@example.com,Manager
-550e8400-e29b-41d4-a716-446655440014,Vikram Singh,vikram.singh@example.com,Employee
-550e8400-e29b-41d4-a716-446655440015,Ananya Iyer,ananya.iyer@example.com,Manager
-550e8400-e29b-41d4-a716-446655440016,Karthik Raj,karthik.raj@example.com,Employee
-550e8400-e29b-41d4-a716-446655440017,Meera Nair,meera.nair@example.com,Manager
-550e8400-e29b-41d4-a716-446655440018,Rahul Verma,rahul.verma@example.com,Employee
-550e8400-e29b-41d4-a716-446655440019,Sneha Patil,sneha.patil@example.com,Manager
+550e8400-e29b-41d4-a716-446655440010,Ravi Kumar,ravi@example.com,Engineer
+550e8400-e29b-41d4-a716-446655440011,Priya Singh,priya@example.com,Technician
+550e8400-e29b-41d4-a716-446655440012,Arjun Mehta,arjun@example.com,Manager

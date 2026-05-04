@@ -1,41 +1,43 @@
-using {eam as db} from '../db/schema';
+using { eam as db } from '../db/schema';
 
+@path: '/odata/v4/enterprise'
 service enterpriseService {
-     type approveInput : {
-          assetName   : String;
-          type        : String;
 
-          @Core.Immutable
-          requestedBy : UUID;
-          status      : String enum {
-               pending  @title: 'Pending';
-               approved @title: 'Approved';
-               rejected @title: 'Rejected';
-          };
-     }
+    @readonly entity Assets   as projection on db.Assets;
+    @readonly entity employee as projection on db.employee;
+    @readonly entity statusVH as projection on db.Status;  // ✅ exposed for value help
 
-     entity Assets as projection on db.Assets;
+    entity assignment as projection on db.assignment {
+        *,
+        asset.location as assetLocation : String,
+        asset.status   as assetStatus   : String,
+        employee.email as employeeEmail : String,
+        employee.role  as employeeRole  : String,
+        maintenances
+    } actions {
+        action closeAssignment() returns assignment;
+    };
 
-     entity AssetRequests as projection on db.AssetRequests actions{
-          action requested();
-          action approved();
-     action createreq(assetName:String,
-       type:String,
-       status:String) returns AssetRequests;
-        
-     }
+    entity maintenance as projection on db.maintenance {
+        *,
+        // ── navigable association (keeps status_code writable) ──────────
+        status,                                             // ✅ exposes status_code + association
 
-    
-     entity employee      as projection on db.employee;
-     entity assignment    as projection on db.assignment;
-     entity maintenance   as projection on db.maintenance;
+        // ── flattened read fields for UI display ────────────────────────
+        asset.name         as assetName        : String,
+        employee.name      as technicianName   : String,
+        status.description as statusDescription: String,   // ✅ for UI.DataFieldWithCriticality Value
+        status.criticality as criticality      : Integer   // ✅ for Criticality property
+    } actions {
+        @Common.IsActionCritical: false
+        action acceptMaintenance() returns maintenance;
 
-     entity statusVH as projection on db.Status;
+        @Common.IsActionCritical: true
+        action rejectMaintenance() returns maintenance;
+
+        action openMaintenance()   returns maintenance;
+    };
 }
-annotate enterpriseService.AssetRequests with @odata.draft.enabled;
-annotate enterpriseService.maintenance with @odata.draft.enabled;
+
+// ✅ Only assignment gets draft — maintenance inherits automatically
 annotate enterpriseService.assignment with @odata.draft.enabled;
-
-
-
-

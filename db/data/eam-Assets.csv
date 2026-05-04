@@ -9,5 +9,3 @@ ID,name,type,serialNumber,purchaseDate,value,status,location
 550e8400-e29b-41d4-a716-446655440007,Firewall,Security,SN99001,2020-09-25,80000,Active,Bangalore
 550e8400-e29b-41d4-a716-446655440008,Scanner,Electronics,SN22334,2022-04-30,10000,Retired,Kolkata
 550e8400-e29b-41d4-a716-446655440009,UPS,Power,SN55667,2021-07-14,20000,Maintenance,Hyderabad
-
-
